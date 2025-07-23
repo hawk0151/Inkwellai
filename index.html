@@ -1,1 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inkwell AI - Your Personal Storyteller</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body { font-family: 'Nunito Sans', sans-serif; background-color: #FDFCFB; color: #1A3A3A; }
+        .font-serif { font-family: 'Lora', serif; }
+        .hero-bg { background: linear-gradient(135deg, rgba(13, 58, 58, 0.9), rgba(26, 58, 58, 0.95)), url('https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=1974&auto=format&fit=crop') center/cover; }
+        .btn-primary { @apply bg-amber-500 text-teal-900 font-bold py-3 px-8 rounded-full hover:bg-amber-400 transition-all duration-300 shadow-lg hover:shadow-xl disabled:bg-amber-200 disabled:cursor-not-allowed; }
+        .btn-secondary { @apply bg-white/20 text-white font-semibold py-2 px-6 rounded-full hover:bg-white/30 transition-all duration-300; }
+        .wizard-step { display: none; }
+        .wizard-step.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .progress-bar-fill { transition: width 0.5s ease-in-out; }
+        .option-card { border: 2px solid #E0E7E7; transition: all 0.3s ease; cursor: pointer; }
+        .option-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(26, 58, 58, 0.07); }
+        .option-card.selected { border-color: #f59e0b; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); background-color: #FFFDF7; }
+        .book-mockup { perspective: 1500px; }
+        .book-cover { width: 100%; height: 100%; background-color: #E0E7E7; background-size: cover; background-position: center; transform: rotateY(-25deg) rotateX(5deg); box-shadow: -10px 10px 30px rgba(0,0,0,0.2), inset -2px -2px 10px rgba(0,0,0,0.1); transition: transform 0.5s ease; }
+        .book-mockup:hover .book-cover { transform: rotateY(-15deg) rotateX(2deg) scale(1.02); }
+        .StripeElement { background-color: white; padding: 12px 16px; border-radius: 8px; border: 1px solid #d1d5db; }
+    </style>
+</head>
+<body class="antialiased">
 
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-4xl font-bold font-serif text-teal-800">Inkwell AI</h1>
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="#how-it-works" class="text-gray-600 hover:text-teal-700">How It Works</a>
+                <a href="#create" class="btn-primary text-sm">Create a Book</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-bg text-white py-24 sm:py-32">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-5xl md:text-7xl font-bold font-serif leading-tight mb-4">A Story Only You Can Tell.</h2>
+            <p class="text-xl md:text-2xl mb-10 max-w-3xl mx-auto font-light">Transform your ideas, memories, and personality into a beautifully written, custom-printed book. The ultimate personal treasure.</p>
+            <a href="#create" class="btn-primary text-lg">Start Your Story</a>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-24 bg-teal-50/30">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl md:text-5xl font-bold font-serif text-center mb-16 text-teal-900">From Idea to Heirloom in Three Steps</h2>
+            <div class="grid md:grid-cols-3 gap-10 text-center relative">
+                 <div class="hidden md:block absolute top-1/2 left-0 w-full h-0 border-t-2 border-dashed border-teal-200" style="transform: translateY(-50%); margin-top: -3rem;"></div>
+                <div class="relative z-10"><div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-amber-400"><div class="bg-teal-800 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 text-2xl font-bold font-serif">1</div><h3 class="text-2xl font-bold font-serif mb-4">Provide the Spark</h3><p class="text-gray-600">Tell us about the hero of your story—their personality, passions, and the world you imagine for them.</p></div></div>
+                <div class="relative z-10"><div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-amber-400"><div class="bg-teal-800 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 text-2xl font-bold font-serif">2</div><h3 class="text-2xl font-bold font-serif mb-4">Craft & Refine</h3><p class="text-gray-600">Our AI weaves your ideas into a unique narrative. Upload a cover image and preview your creation instantly.</p></div></div>
+                <div class="relative z-10"><div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-amber-400"><div class="bg-teal-800 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 text-2xl font-bold font-serif">3</div><h3 class="text-2xl font-bold font-serif mb-4">Bring it to Life</h3><p class="text-gray-600">We print, bind, and ship your beautiful, professionally-finished book directly to your doorstep.</p></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Create Your Book Section -->
+    <section id="create" class="py-24">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-2xl border border-gray-100">
+                <div id="wizard-container">
+                    <h2 class="text-4xl md:text-5xl font-bold font-serif text-center mb-4 text-teal-900">Create Your Book</h2>
+                    <p class="text-center text-gray-600 mb-8">Follow these steps to design your one-of-a-kind story.</p>
+                    
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-10">
+                        <div id="progress-bar" class="bg-teal-600 h-2.5 rounded-full progress-bar-fill" style="width: 20%"></div>
+                    </div>
+
+                    <form id="book-wizard-form" novalidate>
+                        <!-- Step 1: The Muse -->
+                        <div id="step-1" class="wizard-step active"><h3 class="text-2xl font-semibold mb-6">Step 1: Who is this story for?</h3><div class="grid md:grid-cols-2 gap-6"><div><label for="recipient-name" class="block text-sm font-medium text-gray-700 mb-1">Their Name</label><input type="text" id="recipient-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500" required></div><div><label for="recipient-relation" class="block text-sm font-medium text-gray-700 mb-1">Your Relation</label><input type="text" id="recipient-relation" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500"></div></div><div class="mt-6"><label for="recipient-info" class="block text-sm font-medium text-gray-700 mb-1">Tell us about them</label><textarea id="recipient-info" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500" placeholder="Hobbies, personality traits, special memories..." required></textarea></div><div class="mt-8 text-right"><button type="button" class="btn-primary next-step">Next Step &rarr;</button></div></div>
+
+                        <!-- Step 2: The Genre -->
+                        <div id="step-2" class="wizard-step"><h3 class="text-2xl font-semibold mb-6">Step 2: Choose the Adventure</h3><div class="grid grid-cols-2 md:grid-cols-3 gap-6 option-group" id="genre-selection"><div class="option-card p-6 rounded-lg text-center" data-value="Fantasy"><h4 class="text-xl font-bold">Fantasy</h4></div><div class="option-card p-6 rounded-lg text-center" data-value="Sci-Fi"><h4 class="text-xl font-bold">Sci-Fi</h4></div><div class="option-card p-6 rounded-lg text-center" data-value="Adventure"><h4 class="text-xl font-bold">Adventure</h4></div><div class="option-card p-6 rounded-lg text-center" data-value="Mystery"><h4 class="text-xl font-bold">Mystery</h4></div><div class="option-card p-6 rounded-lg text-center" data-value="Heartwarming"><h4 class="text-xl font-bold">Heartwarming</h4></div><div class="option-card p-6 rounded-lg text-center" data-value="Children's Story"><h4 class="text-xl font-bold">Children's</h4></div></div><input type="hidden" id="selected-genre" name="genre" required><div class="mt-8 flex justify-between"><button type="button" class="btn-secondary prev-step">&larr; Back</button><button type="button" class="btn-primary next-step">Next Step &rarr;</button></div></div>
+
+                        <!-- Step 3: The Cover -->
+                        <div id="step-3" class="wizard-step"><h3 class="text-2xl font-semibold mb-6">Step 3: Design the Cover & Generate Story</h3><div class="grid md:grid-cols-2 gap-8 items-center"><div class="space-y-6"><div><label for="book-title" class="block text-sm font-medium text-gray-700 mb-1">Book Title</label><input type="text" id="book-title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500" required></div><div><label class="block text-sm font-medium text-gray-700 mb-2">Upload a cover image</label><button type="button" id="upload-btn" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-lg border border-gray-300">Choose a Photo...</button><input type="file" id="cover-image-upload" class="hidden" accept="image/*" required></div></div><div class="book-mockup h-96"><div id="book-cover-preview" class="book-cover rounded-lg flex items-center justify-center text-center p-4"><div id="cover-placeholder" class="text-teal-800/50"><svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg><p class="font-semibold mt-2">Your Image Here</p></div></div></div></div><div class="mt-8 flex justify-between"><button type="button" class="btn-secondary prev-step">&larr; Back</button><button type="button" id="generate-story-btn" class="btn-primary">Weave My Tale!</button></div><div id="story-preview-container" class="mt-6 hidden"><h4 class="text-xl font-semibold mb-2">Story Preview:</h4><div id="story-preview-content" class="p-4 bg-gray-50 rounded-lg border max-h-48 overflow-y-auto"></div><div class="text-right mt-4"><button type="button" class="btn-primary next-step">Looks Good, Continue &rarr;</button></div></div></div>
+                        
+                        <!-- Step 4: Finalize & Pay -->
+                        <div id="step-4" class="wizard-step"><h3 class="text-2xl font-semibold mb-6">Step 4: Finalize Your Order</h3><div class="grid md:grid-cols-2 gap-8"><div class="space-y-6"><div><h4 class="text-lg font-semibold">1. Choose Book Type</h4><div class="grid grid-cols-2 gap-4 option-group" id="book-type-selection"><div class="option-card p-4 rounded-lg text-center" data-value="paperback" data-price="29.99"><h5 class="font-bold">Paperback</h5><p class="text-sm">$29.99</p></div><div class="option-card p-4 rounded-lg text-center" data-value="hardcover" data-price="42.99"><h5 class="font-bold">Hardcover</h5><p class="text-sm">$42.99</p></div></div><input type="hidden" id="selected-book-type" name="book-type" required></div><div><h4 class="text-lg font-semibold">2. Choose Shipping</h4><div class="grid grid-cols-2 gap-4 option-group" id="shipping-type-selection"><div class="option-card p-4 rounded-lg text-center" data-value="standard" data-price="4.99"><h5 class="font-bold">Standard</h5><p class="text-sm">$4.99</p></div><div class="option-card p-4 rounded-lg text-center" data-value="express" data-price="10.99"><h5 class="font-bold">Express</h5><p class="text-sm">$10.99</p></div></div><input type="hidden" id="selected-shipping-type" name="shipping-type" required></div></div><div class="bg-teal-50/50 p-6 rounded-lg"> <h4 class="text-lg font-semibold mb-4 border-b pb-2">Order Summary</h4><div class="space-y-2 text-gray-700"> <div class="flex justify-between"><span>Book:</span><span id="summary-book">N/A</span></div><div class="flex justify-between"><span>Shipping:</span><span id="summary-shipping">N/A</span></div><div class="flex justify-between font-bold text-xl pt-2 border-t mt-2"><span>Total:</span><span id="summary-total">$0.00</span></div></div></div></div><div class="mt-8"><h4 class="text-lg font-semibold mb-4">3. Payment & Shipping Details</h4><div id="payment-element"></div><div id="card-errors" role="alert" class="text-red-600 text-sm mt-2"></div></div><div class="mt-8 flex justify-between"><button type="button" class="btn-secondary prev-step">&larr; Back</button><button type="submit" id="submit-payment-btn" class="btn-primary">Pay & Place Order</button></div></div>
+                    </form>
+                </div>
+                <!-- Step 5: Confirmation -->
+                <div id="step-5" class="wizard-step text-center py-10"><svg class="mx-auto h-24 w-24 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><h3 class="text-3xl font-bold font-serif mt-6 mb-2">Thank You!</h3><p class="text-gray-600 mb-4">Your order has been placed successfully.</p><div class="bg-gray-100 p-4 rounded-lg text-left max-w-md mx-auto"><p><strong>Order ID:</strong> <span id="confirmation-order-id"></span></p><p>A confirmation email is on its way. We'll notify you again once your magical book has been shipped!</p></div><button type="button" id="start-over-btn" class="btn-primary mt-8">Create Another Book</button></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-teal-900 text-white py-12">
+        <div class="container mx-auto px-6 text-center">
+            <p class="font-serif text-2xl mb-2">Inkwell AI</p>
+            <p>&copy; 2025 Inkwell AI. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIG ---
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : '';
+        const STRIPE_PUBLISHABLE_KEY = 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'; // REPLACE WITH YOUR KEY
+
+        // --- DOM Elements ---
+        const wizardContainer = document.getElementById('wizard-container');
+        const wizardForm = document.getElementById('book-wizard-form');
+        const progressBar = document.getElementById('progress-bar');
+        const steps = Array.from(document.querySelectorAll('.wizard-step'));
+        const nextButtons = document.querySelectorAll('.next-step');
+        const prevButtons = document.querySelectorAll('.prev-step');
+        const generateStoryBtn = document.getElementById('generate-story-btn');
+        const storyPreviewContainer = document.getElementById('story-preview-container');
+        const storyPreviewContent = document.getElementById('story-preview-content');
+        const submitPaymentBtn = document.getElementById('submit-payment-btn');
+        const startOverBtn = document.getElementById('start-over-btn');
+        const uploadBtn = document.getElementById('upload-btn');
+        const coverImageInput = document.getElementById('cover-image-upload');
+        const bookCoverPreview = document.getElementById('book-cover-preview');
+        const coverPlaceholder = document.getElementById('cover-placeholder');
+        const cardErrors = document.getElementById('card-errors');
+
+        // --- State ---
+        let currentStep = 0;
+        let stripe = null;
+        let elements = null;
+        let clientSecret = null;
+        let orderData = {}; 
+
+        // --- Wizard Logic ---
+        const updateWizard = (stepIndex) => {
+            currentStep = stepIndex;
+            steps.forEach((step, index) => step.classList.toggle('active', index === currentStep));
+            if(stepIndex === 4) {
+                wizardContainer.classList.add('hidden');
+            } else {
+                wizardContainer.classList.remove('hidden');
+            }
+            const progress = ((currentStep + 1) / (steps.length + 1)) * 100;
+            progressBar.style.width = `${progress}%`;
+        };
+
+        const validateStep = (stepIndex) => {
+            const currentStepElement = steps[stepIndex];
+            const requiredInputs = currentStepElement.querySelectorAll('[required]');
+            let allValid = true;
+
+            requiredInputs.forEach(input => {
+                let elementToStyle = input;
+                if (input.type === 'hidden') {
+                    elementToStyle = input.parentElement.querySelector('.option-group');
+                } else if (input.type === 'file') {
+                    elementToStyle = uploadBtn;
+                }
+                
+                elementToStyle.classList.remove('border-red-500', 'border-2');
+
+                if (!input.value) {
+                    elementToStyle.classList.add('border-red-500', 'border-2');
+                    allValid = false;
+                }
+            });
+            return allValid;
+        };
+
+        nextButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (validateStep(currentStep)) {
+                    updateWizard(currentStep + 1);
+                     if (currentStep === 3) {
+                        initializePaymentStep();
+                    }
+                }
+            });
+        });
+
+        prevButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (currentStep > 0) {
+                    updateWizard(currentStep - 1);
+                }
+            });
+        });
+        
+        startOverBtn.addEventListener('click', () => window.location.reload());
+
+        uploadBtn.addEventListener('click', () => coverImageInput.click());
+        coverImageInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    bookCoverPreview.style.backgroundImage = `url('${e.target.result}')`;
+                    coverPlaceholder.classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+                coverImageInput.value = file.name;
+                uploadBtn.classList.remove('border-red-500', 'border-2');
+            }
+        });
+
+        document.querySelectorAll('.option-group').forEach(group => {
+            group.addEventListener('click', (e) => {
+                const card = e.target.closest('.option-card');
+                if (!card) return;
+                group.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                
+                const inputId = `selected-${group.id.split('-')[0]}-type`;
+                const inputElement = document.getElementById(inputId);
+                
+                if (inputElement) {
+                    inputElement.value = card.dataset.value;
+                    group.classList.remove('border-red-500', 'border-2');
+                }
+
+                if (group.id.includes('book-type') || group.id.includes('shipping-type')) {
+                    updateOrderSummary();
+                }
+            });
+        });
+
+        generateStoryBtn.addEventListener('click', async () => {
+            if (!validateStep(currentStep)) return;
+            
+            generateStoryBtn.disabled = true;
+            generateStoryBtn.textContent = 'Weaving...';
+            
+            const formData = new FormData();
+            formData.append('title', document.getElementById('book-title').value);
+            formData.append('genre', document.getElementById('selected-genre').value);
+            formData.append('promptText', document.getElementById('recipient-info').value);
+            formData.append('coverImage', coverImageInput.files[0]);
+
+            try {
+                const response = await fetch(`${API_URL}/api/create-draft`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'An unknown error occurred.');
+
+                orderData.storyText = data.story;
+                orderData.coverImageFilename = data.coverImageFilename;
+
+                storyPreviewContent.innerHTML = data.story.replace(/\n/g, '<br>');
+                storyPreviewContainer.classList.remove('hidden');
+
+            } catch (error) {
+                storyPreviewContent.innerHTML = `<p class="text-red-500">Could not generate story. ${error.message}</p>`;
+                storyPreviewContainer.classList.remove('hidden');
+                console.error("Detailed story generation error:", error);
+            } finally {
+                generateStoryBtn.disabled = false;
+                generateStoryBtn.textContent = 'Weave My Tale!';
+            }
+        });
+        
+        const updateOrderSummary = () => {
+            const bookType = document.getElementById('selected-book-type').value;
+            const shippingType = document.getElementById('selected-shipping-type').value;
+
+            if (!bookType || !shippingType) return;
+
+            const bookPrice = parseFloat(document.querySelector(`#book-type-selection .option-card[data-value="${bookType}"]`).dataset.price);
+            const shippingPrice = parseFloat(document.querySelector(`#shipping-type-selection .option-card[data-value="${shippingType}"]`).dataset.price);
+            
+            document.getElementById('summary-book').textContent = `$${bookPrice.toFixed(2)}`;
+            document.getElementById('summary-shipping').textContent = `$${shippingPrice.toFixed(2)}`;
+            document.getElementById('summary-total').textContent = `$${(bookPrice + shippingPrice).toFixed(2)}`;
+        };
+
+        const initializePaymentStep = async () => {
+            const bookType = document.getElementById('selected-book-type').value;
+            const shippingType = document.getElementById('selected-shipping-type').value;
+            if (!bookType || !shippingType) {
+                cardErrors.textContent = 'Please select book and shipping types first.';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/create-payment-intent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookType, shippingType })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                
+                clientSecret = data.clientSecret;
+                if (!stripe) stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+                if (elements) elements.destroy();
+                elements = stripe.elements({ clientSecret });
+                const paymentElement = elements.create('payment');
+                paymentElement.mount('#payment-element');
+
+            } catch (error) {
+                console.error('Error initializing payment:', error);
+                cardErrors.textContent = `Could not initialize payment: ${error.message}`;
+            }
+        };
+        
+        wizardForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (currentStep !== 3 || !validateStep(currentStep)) return;
+
+            submitPaymentBtn.disabled = true;
+            submitPaymentBtn.textContent = 'Processing...';
+
+            const { error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: { return_url: window.location.href.split('#')[0] },
+                redirect: 'if_required'
+            });
+
+            if (error) {
+                cardErrors.textContent = error.message;
+                submitPaymentBtn.disabled = false;
+                submitPaymentBtn.textContent = 'Pay & Place Order';
+            } else {
+                try {
+                    const finalOrderData = {
+                        shippingDetails: {
+                            name: document.getElementById('shipping-name').value,
+                            email: document.getElementById('shipping-email').value
+                        },
+                        bookTitle: document.getElementById('book-title').value,
+                        bookType: document.getElementById('selected-book-type').value,
+                        coverImageFilename: orderData.coverImageFilename,
+                        storyText: orderData.storyText
+                    };
+
+                    const finalResponse = await fetch(`${API_URL}/api/create-final-order`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(finalOrderData)
+                    });
+                    const resultData = await finalResponse.json();
+                    if (!resultData.success) throw new Error(resultData.error);
+                    
+                    document.getElementById('confirmation-order-id').textContent = resultData.orderId;
+                    updateWizard(currentStep + 1);
+                } catch (finalOrderError) {
+                    console.error(finalOrderError);
+                    cardErrors.textContent = `Payment succeeded, but the final order failed: ${finalOrderError.message}. Please contact support.`;
+                    submitPaymentBtn.disabled = false;
+                    submitPaymentBtn.textContent = 'Pay & Place Order';
+                }
+            }
+        });
+
+        updateWizard(0);
+    });
+    </script>
+</body>
+</html>
